@@ -1,6 +1,6 @@
 #include <Servo.h>
 
-#define HC11_SetupPin 4
+#define HC12_SetupPin 4
 #define GEO_CHANEL "AT+C001"
 #define SAT_CHANEL "AT+C010"
 
@@ -10,14 +10,12 @@ Servo left_whel;
 Servo right_whel;
 
 struct GEO {
- int x;
- int y;
- int grad; 
+  int x;
+  int y;
+  int grad;
 };
 
 GEO geo_data;
-int start_x, start_y;
-
 
 void setup() {
   // put your setup code here, to run once:
@@ -25,234 +23,197 @@ void setup() {
   Serial1.begin(9600);
   Serial1.flush();
 
-  pinMode(HC11_SetupPin, OUTPUT);
-  digitalWrite(HC11_SetupPin, HIGH);
-  
+  pinMode(HC12_SetupPin, OUTPUT);
+  digitalWrite(HC12_SetupPin, HIGH);
+
   left_whel.attach(9);
   right_whel.attach(10);
 
   left_whel.write(90);
-  right_whel.write(90); 
-  
+  right_whel.write(90);
+
   set_transmiter_chanel(GEO_CHANEL);
 
-  
 }
 
 void loop() {
-  
-  // move sat to zero
 
-  
-  // rotate to 360;
+  //Test programm form movment via rectangle
 
-     rotate_right_to(360);
-     
-     move_x(400);
+  rotate_right_to(360);
 
-     move_sat(25);
+  move_x(400);
 
-     move_x(400);
+  move_sat(25);
 
-     rotate_right_to(90);
+  move_x(400);
 
-     move_y(400);
+  rotate_right_to(90);
 
-     rotate_right_to(180);
-     
-     move_x(-400);
+  move_y(400);
 
-     move_sat(-25);
+  rotate_right_to(180);
 
-     move_x(-400);
+  move_x(-400);
 
-     rotate_right_to(270);
+  move_sat(-25);
 
-     move_y(-400);
-     
-     //Serial1.println("200");
-     //Serial.println("200");
-     //delay(100);
+  move_x(-400);
 
-     
-     //delay(3000);
-     //set_transmiter_chanel(SAT_CHANEL);
-     
-  // move sat +200
+  rotate_right_to(270);
 
-  // move forvard +200
+  move_y(-400);
 
-  // rotate 180
-
-  // move forvard +200
-
-  // move sat -200
-
-  // move forvard 200 
-  
-  //Serial.println(geo_data.grad);
 }
 
-void move_sat(int steps){
+void move_sat(int steps) {
 
   set_transmiter_chanel(SAT_CHANEL);
   //STOP
-  Serial1.write((byte) 0x00);delay(50); //first byte broken at radio 
-  Serial1.write((byte) 0x30);delay(50); // 0
+  Serial1.write((byte) 0x00); delay(50); //first byte broken at radio
+  Serial1.write((byte) 0x30); delay(50); // 0
   Serial1.println();
   delay(1000);
-  
-  Serial.println(String(steps));  
+
+  Serial.println(String(steps));
   Serial1.println(String(steps));
 
   delay(1000);
-  
-  while(1) { 
-    if(Serial1.available() > 0) {
-      
-       str = Serial1.readStringUntil('\r'); //have /r/n sting
-       Serial.println(str);
-       if(str == "STOP"){ 
-          set_transmiter_chanel(GEO_CHANEL);
-          read_geo_data();//wait until geo data normal
-          return;
-       }
-      
+
+  while (1) {
+    if (Serial1.available() > 0) {
+
+      str = Serial1.readStringUntil('\r'); //have /r/n sting
+      Serial.println(str);
+      if (str == "STOP") {
+        set_transmiter_chanel(GEO_CHANEL);
+        read_geo_data();//wait until geo data normal
+        return;
+      }
+
     }
   }
-  
-  
+
+
 }
 
-void move_x(int steps){
+void move_x(int steps) {
 
   GEO start_geo_data = read_geo_data();
-  
+
   int speed = 30;
-  
-  right_whel.write(90+speed);
-  left_whel.write(90-speed);
-         
-  while(1) {
-    
-    geo_data = read_geo_data(); 
-    
-    if(steps >0 and geo_data.x > start_geo_data.x + steps) {     
-        servo_stop();
-        return;      
-    } 
 
-    if(steps < 0 and geo_data.x < start_geo_data.x + steps) {
-        servo_stop();
-        return;    
-    }
-  }
-  
-}
+  right_whel.write(90 + speed);
+  left_whel.write(90 - speed);
 
-void move_y(int steps){
+  while (1) {
 
-  GEO start_geo_data = read_geo_data();
-  
-  int speed = 30;
-  
-  right_whel.write(90+speed);
-  left_whel.write(90-speed);
-         
-  while(1) {
-    
-    geo_data = read_geo_data(); 
-    
-    if(steps >0 and geo_data.y > start_geo_data.y + steps) {     
-        servo_stop();
-        return;      
-    } 
-
-    if(steps < 0 and geo_data.y < start_geo_data.y + steps) {
-        servo_stop();
-        return;    
-    }
-  }
-  
-}
-
-
-void rotate_right_to(int grad){
-
-  int speed = 8;
-  
-  while(1) {
     geo_data = read_geo_data();
 
-//    if(geo_data.grad > grad) {
-//      //left_whel.write(90+speed);
-//      //right_whel.write(90+speed);
-//      whels_speed(20,-20, 100);      
-//    }
-//
-//    if(geo_data.grad < grad){
-//      //left_whel.write(90-speed);
-//      //right_whel.write(90-speed);
-//      whels_speed(-20, 20, 100);
-//    }
+    if (steps > 0 and geo_data.x > start_geo_data.x + steps) {
+      servo_stop();
+      return;
+    }
+
+    if (steps < 0 and geo_data.x < start_geo_data.x + steps) {
+      servo_stop();
+      return;
+    }
+  }
+
+}
+
+void move_y(int steps) {
+
+  GEO start_geo_data = read_geo_data();
+
+  int speed = 30;
+
+  right_whel.write(90 + speed);
+  left_whel.write(90 - speed);
+
+  while (1) {
+
+    geo_data = read_geo_data();
+
+    if (steps > 0 and geo_data.y > start_geo_data.y + steps) {
+      servo_stop();
+      return;
+    }
+
+    if (steps < 0 and geo_data.y < start_geo_data.y + steps) {
+      servo_stop();
+      return;
+    }
+  }
+
+}
+
+
+void rotate_right_to(int grad) {
+
+  int speed = 8;
+
+  while (1) {
+    geo_data = read_geo_data();
 
     whels_speed(-20, 20, 100);
 
     //aprox grad
-    if(geo_data.grad >= grad-4 and geo_data.grad <= grad+4){
+    //TODO have problem near 360->0 position
+    if (geo_data.grad >= grad - 4 and geo_data.grad <= grad + 4) {
       servo_stop();
       Serial.println("ROTATE END");
       return;
     }
   }
-  
+
 }
 
-void servo_stop(){
-  
-    left_whel.write(90);
-    right_whel.write(90);   
+void servo_stop() {
+
+  left_whel.write(90);
+  right_whel.write(90);
 }
 
-void whels_speed(int speed_l, int speed_r, int timeout){
+void whels_speed(int speed_l, int speed_r, int timeout) {
 
-    left_whel.write(90+speed_l);
-    right_whel.write(90-speed_r);
+  left_whel.write(90 + speed_l);
+  right_whel.write(90 - speed_r);
 
-    delay(timeout);
-    servo_stop();
- 
-    
-}  
+  delay(timeout);
+  servo_stop();
+
+}
 
 
 GEO read_geo_data() {
 
-  while(1){
-  
-    if(Serial1.available() > 0) {
-  
+  while (1) {
+
+    if (Serial1.available() > 0) {
+
       str = Serial1.readStringUntil('\n');
       //str = "00;1019;0609;192";
       Serial.println(str);
-      
-      geo_data.x    = str.substring(3,7).toInt();
-      geo_data.y    = str.substring(8,12).toInt();
-      geo_data.grad = str.substring(13,16).toInt();
-      
-      
-    return geo_data;
-    } 
+
+      geo_data.x    = str.substring(3, 7).toInt();
+      geo_data.y    = str.substring(8, 12).toInt();
+      geo_data.grad = str.substring(13, 16).toInt();
+
+
+      return geo_data;
+    }
   }
-}  
+}
 
-void set_transmiter_chanel(char* set_chanel){
-  
-   digitalWrite(HC11_SetupPin, LOW);
-   delay(500); 
-   Send_command(set_chanel);
+void set_transmiter_chanel(char* set_chanel) {
 
-   digitalWrite(HC11_SetupPin, HIGH);
+  digitalWrite(HC12_SetupPin, LOW);
+  delay(500);
+  Send_command(set_chanel);
+
+  digitalWrite(HC12_SetupPin, HIGH);
 
 }
 
@@ -261,12 +222,12 @@ void Send_command(char* ATcommand) {
   Serial1.println (ATcommand);
   Serial.println (ATcommand);
   delay(1000);
-  if(Serial1.available() > 0)
-    {
-        str = Serial1.readStringUntil('\n');// LF
-        Serial.println (str);
-    }
-  delay(500);  
+  if (Serial1.available() > 0)
+  {
+    str = Serial1.readStringUntil('\n');// LF
+    Serial.println (str);
   }
+  delay(500);
+}
 
 
