@@ -26,11 +26,7 @@ void setup() {
   pinMode(HC12_SetupPin, OUTPUT);
   digitalWrite(HC12_SetupPin, HIGH);
 
-  left_whel.attach(9);
-  right_whel.attach(10);
-
-  left_whel.write(90);
-  right_whel.write(90);
+  servo_attach();
 
   set_transmiter_chanel(GEO_CHANEL);
 
@@ -40,33 +36,36 @@ void loop() {
 
   //Test programm form movment via rectangle
 
-  rotate_right_to(360);
+  rotate_right_to(90);
 
-  move_x(400);
+  move_y(300);
 
   move_sat(25);
 
-  move_x(400);
-
-  rotate_right_to(90);
-
-  move_y(400);
+  move_y(300);
 
   rotate_right_to(180);
 
-  move_x(-400);
-
-  move_sat(-25);
-
-  move_x(-400);
+  move_x(-300);
 
   rotate_right_to(270);
 
-  move_y(-400);
+  move_y(-300);
+
+  move_sat(-25);
+
+  move_y(-300);
+
+  rotate_right_to(360);
+
+  move_x(300);
 
 }
 
 void move_sat(int steps) {
+
+  //turn of servos
+  servo_detach();
 
   set_transmiter_chanel(SAT_CHANEL);
   //STOP
@@ -87,7 +86,10 @@ void move_sat(int steps) {
       Serial.println(str);
       if (str == "STOP") {
         set_transmiter_chanel(GEO_CHANEL);
+
         read_geo_data();//wait until geo data normal
+        servo_attach();//attach servos
+
         return;
       }
 
@@ -168,6 +170,21 @@ void rotate_right_to(int grad) {
     }
   }
 
+}
+
+void servo_detach() {
+
+  left_whel.detach();
+  right_whel.detach();
+
+}
+
+void servo_attach() {
+
+  left_whel.attach(9);
+  right_whel.attach(10);
+
+  servo_stop();
 }
 
 void servo_stop() {
